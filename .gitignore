@@ -5,3 +5,8 @@
 /coverage/
 *.gem
 /.idea/
+
+# Local secrets — keep .env.example tracked, ignore real env files
+.env
+.env.*
+!.env.example

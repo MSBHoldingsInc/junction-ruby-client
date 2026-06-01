@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'bundler/setup'
+require 'dotenv/load' # loads a local .env if present
+require 'junction'
+
+# Put your credentials in a .env file (see .env.example) or pass them inline:
+#   JUNCTION_API_KEY=sk_... bin/console
+Junction.configure do |c|
+  c.api_key  = ENV.fetch('JUNCTION_API_KEY', nil)
+  c.base_uri = ENV.fetch('JUNCTION_BASE_URI', 'https://api.sandbox.us.junction.com')
+end
+
+require 'irb'
+IRB.start(__FILE__)

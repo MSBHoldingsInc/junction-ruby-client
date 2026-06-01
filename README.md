@@ -99,3 +99,10 @@ original `response` (`error.response.code`, `error.response.body`).
 bundle install
 bundle exec rspec
 ```
+
+To fire up a console:
+
+```bash
+# Set up your .env first (copy .env.example), and then run:
+bin/console
+```
