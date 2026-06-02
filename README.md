@@ -1,4 +1,4 @@
-# junction-ruby
+# junction-ruby-client
 
 A small Ruby client for the [Junction](https://docs.junction.com) (formerly Vital) API.
 
@@ -6,7 +6,7 @@ A small Ruby client for the [Junction](https://docs.junction.com) (formerly Vita
 
 ```ruby
 # Gemfile — note the require override, since the gem name is hyphenated
-gem 'junction-ruby', require: 'junction'
+gem 'junction-ruby-client', require: 'junction'
 ```
 
 ## Configuration

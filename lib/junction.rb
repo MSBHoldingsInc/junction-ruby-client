@@ -7,6 +7,7 @@ require 'junction/version'
 require 'junction/configuration'
 require 'junction/client'
 require 'junction/users'
+require 'junction/orders'
 
 # Ruby client for the Junction (formerly Vital) API.
 module Junction
