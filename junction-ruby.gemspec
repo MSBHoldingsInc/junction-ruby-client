@@ -9,18 +9,24 @@ Gem::Specification.new do |spec|
   spec.email       = ['seth.goodwin@rugiet.com']
 
   spec.summary     = 'Ruby client for the Junction (formerly Vital) API'
-  spec.description  = 'A small HTTParty-based wrapper around the Junction/Vital API.'
-  spec.homepage    = 'https://github.com/msb/junction-ruby' # TODO: update to the real repo URL
-  spec.license     = 'MIT'
+  spec.description = 'A small HTTParty-based wrapper around the Junction/Vital API.'
+  spec.homepage    = 'https://github.com/MSBHoldingsInc/junction-ruby'
+  spec.license     = 'Nonstandard' # proprietary; internal use only, not for public distribution
   spec.required_ruby_version = '>= 3.0'
 
-  spec.metadata['rubygems_mfa_required'] = 'true'
+  # Private gem: consumed by other org repos directly from git, never published
+  # to a registry. 'none' makes `gem push` refuse, guarding against an
+  # accidental public release.
+  spec.metadata['allowed_push_host'] = 'none'
+  spec.metadata['source_code_uri']   = 'https://github.com/MSBHoldingsInc/junction-ruby'
 
-  spec.files         = Dir['lib/**/*.rb', 'README.md']
+  spec.files         = Dir['lib/**/*.rb', 'README.md', 'LICENSE']
   spec.require_paths = ['lib']
 
+  # Core dependencies
   spec.add_dependency 'httparty', '>= 0.21.0'
 
+  # Development dependencies
   spec.add_development_dependency 'dotenv', '~> 3.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
   spec.add_development_dependency 'webmock', '~> 3.0'
