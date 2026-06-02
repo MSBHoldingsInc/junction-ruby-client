@@ -15,16 +15,16 @@ module Junction
     end
 
     class << self
-      def get(endpoint, query = {})
-        handle_response(super(url(endpoint), query: query, headers: headers))
+      def get(endpoint, query = {}, custom_headers = {})
+        handle_response(super(url(endpoint), query: query, headers: default_headers.merge(custom_headers)))
       end
 
-      def post(endpoint, body = {})
-        handle_response(super(url(endpoint), body: body.to_json, headers: headers))
+      def post(endpoint, body = {}, custom_headers = {})
+        handle_response(super(url(endpoint), body: body.to_json, headers: default_headers.merge(custom_headers)))
       end
 
-      def patch(endpoint, body = {})
-        handle_response(super(url(endpoint), body: body.to_json, headers: headers))
+      def patch(endpoint, body = {}, custom_headers = {})
+        handle_response(super(url(endpoint), body: body.to_json, headers: default_headers.merge(custom_headers)))
       end
 
       private
@@ -36,7 +36,7 @@ module Junction
         "#{Junction.configuration.base_uri}#{endpoint}"
       end
 
-      def headers
+      def default_headers
         {
           'Accept'          => 'application/json',
           'Content-Type'    => 'application/json',
