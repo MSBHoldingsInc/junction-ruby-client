@@ -156,8 +156,8 @@ end
 # Pick out the markers the lab flagged as out of range
 abnormal = results['results'].select { |m| m['interpretation'] == 'abnormal' }
 
-# Get lab results PDF and write it to a file                                                                                                                                                                               
-lab_results_pdf = Junction::LabResults.pdf(order_id) # GET /v3/order/{order_id}/result/pdf                                                                                                                              
+# Get lab results PDF and write it to a file
+lab_results_pdf = Junction::LabResults.pdf(order_id) # GET /v3/order/{order_id}/result/pdf
 File.binwrite("tmp/lab-results-#{order_id}.pdf", lab_results_pdf)
 ```
 
@@ -187,9 +187,21 @@ end
 Requires Ruby >= 3.0 (see `.ruby-version`).
 
 ```bash
-bundle install    # install dependencies
-bundle exec rspec # run the full test suite
+bundle install         # install dependencies
+bundle exec rake setup # install the git pre-commit hook (one-time, after cloning)
+bundle exec rake       # run RuboCop + the full test suite (the default task)
 ```
+
+Run the linter or the suite on their own:
+
+```bash
+bundle exec rubocop # lint (add -a to safe-autocorrect)
+bundle exec rspec   # tests
+```
+
+A pre-commit hook (installed by `rake setup` via `core.hooksPath`) runs RuboCop
+on staged Ruby files, auto-fixes safe offenses and re-stages them, and blocks
+the commit if anything remains that can't be corrected automatically.
 
 To open a console with the gem loaded, copy `.env.example` to `.env`, fill in
 your sandbox credentials, then run `bin/console`:

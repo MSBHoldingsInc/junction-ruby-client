@@ -1,0 +1,34 @@
+AllCops:
+  TargetRubyVersion: 3.0
+  NewCops: enable
+  SuggestExtensions: false
+  Exclude:
+    - 'bin/**/*'
+    - 'vendor/**/*'
+    - 'tmp/**/*'
+
+# Small client gem — we keep inline comments but don't enforce class/module docs.
+Style/Documentation:
+  Enabled: false
+
+Layout/LineLength:
+  Max: 120
+
+# Dev dependencies intentionally live in the gemspec, not a separate Gemfile.
+Gemspec/DevelopmentDependencies:
+  Enabled: false
+
+# Private, unpublished gem (allowed_push_host = none) — RubyGems MFA is moot.
+Gemspec/RequireMFA:
+  Enabled: false
+
+# Bundler shim whose hyphenated name must match the gem name.
+Naming/FileName:
+  Exclude:
+    - 'lib/junction-ruby-client.rb'
+
+# Spec example blocks and the gemspec are legitimately long.
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+    - '*.gemspec'

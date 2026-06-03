@@ -28,6 +28,8 @@ Gem::Specification.new do |spec|
 
   # Development dependencies
   spec.add_development_dependency 'dotenv', '~> 3.0'
+  spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
+  spec.add_development_dependency 'rubocop', '~> 1.60'
   spec.add_development_dependency 'webmock', '~> 3.0'
 end

@@ -15,7 +15,8 @@ RSpec.describe Junction::LabResults do
       {
         metadata: { patient: 'Jane Doe', status: 'final', interpretation: 'abnormal' },
         results: [
-          { name: 'HDL Cholesterol', slug: 'hdl', value: 50.0, result: '50', type: 'numeric', interpretation: 'normal' },
+          { name: 'HDL Cholesterol', slug: 'hdl', value: 50.0, result: '50', type: 'numeric',
+            interpretation: 'normal' },
           { name: 'Estradiol (Sensitive)', slug: 'estradiol', value: -1.0, result: '<15', type: 'range',
             is_below_min_range: true, interpretation: 'abnormal' }
         ],

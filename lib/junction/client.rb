@@ -38,8 +38,8 @@ module Junction
 
       def default_headers
         {
-          'Accept'          => 'application/json',
-          'Content-Type'    => 'application/json',
+          'Accept' => 'application/json',
+          'Content-Type' => 'application/json',
           'x-vital-api-key' => Junction.configuration.api_key
         }
       end

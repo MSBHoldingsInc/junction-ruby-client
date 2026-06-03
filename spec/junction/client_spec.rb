@@ -17,7 +17,7 @@ RSpec.describe Junction::Client do
 
     it 'appends query params' do
       stub_request(:get, "#{base}/v2/ping").with(query: { a: '1' })
-        .to_return(status: 200, body: { ok: true }.to_json, headers: json)
+                                           .to_return(status: 200, body: { ok: true }.to_json, headers: json)
 
       expect(described_class.get('/v2/ping', a: '1')).to eq('ok' => true)
     end

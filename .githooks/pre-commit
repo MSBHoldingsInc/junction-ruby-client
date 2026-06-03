@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+#
+# RuboCop pre-commit hook. Safe-autocorrects staged Ruby files, re-stages what
+# it fixed, and blocks the commit if any offenses remain that can't be fixed
+# automatically. Installed via `rake setup` (sets core.hooksPath to .githooks).
+set -uo pipefail
+
+# Staged Ruby-ish files (Added / Copied / Modified).
+files=$(git diff --cached --name-only --diff-filter=ACM -- '*.rb' '*.gemspec' 'Rakefile')
+[ -z "$files" ] && exit 0
+
+# Safe autocorrect only; --force-exclusion honors .rubocop.yml Exclude paths
+# even when files are passed explicitly.
+# shellcheck disable=SC2086
+bundle exec rubocop --autocorrect --force-exclusion $files
+status=$?
+
+# Re-stage anything RuboCop corrected so the fixes land in this commit.
+# shellcheck disable=SC2086
+git add -- $files
+
+if [ "$status" -ne 0 ]; then
+  echo >&2
+  echo "RuboCop reported offenses that can't be auto-corrected. Fix them, then re-stage and commit." >&2
+  exit 1
+fi
+
+exit 0
