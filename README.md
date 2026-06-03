@@ -4,9 +4,24 @@ A small Ruby client for the [Junction](https://docs.junction.com) (formerly Vita
 
 ## Installation
 
-Add to your Gemfile:
+This is a private, unpublished gem — install it directly from GitHub. Add to
+your Gemfile:
+
 ```ruby
-gem 'junction-ruby-client', require: 'junction'
+# Track the HEAD of the default branch (main)
+gem 'junction-ruby-client', git: 'https://github.com/MSBHoldingsInc/junction-ruby-client', require: 'junction'
+```
+
+Or pin to a specific ref for reproducible installs — Bundler locks to it until
+you explicitly change it, so `bundle update` won't pull newer commits. Use one of:
+
+```ruby
+# branch: — follow the tip of a branch
+gem 'junction-ruby-client', git: 'https://github.com/MSBHoldingsInc/junction-ruby-client', branch: 'main', require: 'junction'
+# tag: — lock to a release tag
+gem 'junction-ruby-client', git: 'https://github.com/MSBHoldingsInc/junction-ruby-client', tag: 'v0.3.0', require: 'junction'
+# ref: — lock to an exact commit SHA
+gem 'junction-ruby-client', git: 'https://github.com/MSBHoldingsInc/junction-ruby-client', ref: 'abc1234', require: 'junction'
 ```
 
 ## Configuration
