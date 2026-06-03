@@ -89,6 +89,10 @@ user['dob']              # "1999-01-01"
 
 ### Create and Find an Order
 
+> **Note:** `POST /v3/order` upserts the Junction **User** record. The `patient_details`
+> and `patient_address` sent with each order creation will update that user on Junction's side,
+> so there's no need for a separate "update user" call.
+
 ```ruby
 order = Junction::Orders.create( # POST /v3/order
   user_id: user['user_id'],
