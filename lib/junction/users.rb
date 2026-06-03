@@ -6,6 +6,7 @@ module Junction
     ENDPOINT = '/v2/user'
 
     # Creates a Junction user.
+    # POST /v2/user
     # https://docs.junction.com/api-reference/user/create-user
     # @param client_user_id [String] your own unique ID for the end user
     # @return [Hash]
@@ -14,6 +15,7 @@ module Junction
     end
 
     # Partially updates a user's info (upsert).
+    # PATCH /v2/user/{user_id}/info
     # https://docs.junction.com/api-reference/user/upsert-info
     # Patient name fields (first_name, last_name) must follow specific validation
     # rules due to lab restrictions:
@@ -26,6 +28,7 @@ module Junction
     end
 
     # Fetches a Junction user by its Junction-generated UUID.
+    # GET /v2/user/{user_id}
     # https://docs.junction.com/api-reference/user/get-user
     # @param user_id [String] the `user_id` returned from {.create}
     # @return [Hash]
@@ -35,6 +38,7 @@ module Junction
 
     # Resolves a Junction user by your own internal ID (the `client_user_id`
     # passed to #create).
+    # GET /v2/user/resolve/{client_user_id}
     # https://docs.junction.com/api-reference/user/resolve-user
     # @param client_user_id [String]
     # @return [Hash]

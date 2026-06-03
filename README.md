@@ -4,14 +4,14 @@ A small Ruby client for the [Junction](https://docs.junction.com) (formerly Vita
 
 ## Installation
 
+Add to your Gemfile:
 ```ruby
-# Gemfile — note the require override, since the gem name is hyphenated
 gem 'junction-ruby-client', require: 'junction'
 ```
 
 ## Configuration
 
-Configure once at boot. In Rails, `config/initializers/junction.rb`:
+Add an initializer `config/initializers/junction.rb` with a `#configure` block:
 
 ```ruby
 Junction.configure do |c|
@@ -21,7 +21,9 @@ Junction.configure do |c|
 end
 ```
 
-| Setting    | Default                                  | Notes                                            |
+### Options
+
+| Option     | Default                                  | Notes                                            |
 |------------|------------------------------------------|--------------------------------------------------|
 | `api_key`  | `nil`                                    | Sent as the `x-vital-api-key` header.            |
 | `base_uri` | `https://api.sandbox.us.junction.com`    | Region/env host (`api.us` / `api.eu`, sandbox or prod). |
@@ -32,7 +34,7 @@ Every JSON endpoint returns a parsed `Hash` with **string keys**. The snippets
 below show how to read the parts you'll typically want; see the
 [Junction API reference](https://docs.junction.com) for the full response schemas.
 
-### Create and find a user
+### Create and Find a User
 
 `create`, `find`, and `find_by_client_user_id` all return the same user `Hash`:
 
@@ -45,7 +47,7 @@ user['user_id']        # Junction's UUID
 user['client_user_id'] # Your own internal ID, e.g. "development_1234"
 ```
 
-### Update user demographics
+### Update User Demographics
 
 ```ruby
 user = Junction::Users.update_user_demographics( # PATCH /v2/user/{user_id}/info
@@ -70,7 +72,7 @@ user['address']['state'] # "AZ"
 user['dob']              # "1999-01-01"
 ```
 
-### Create and find an order
+### Create and Find an Order
 
 ```ruby
 order = Junction::Orders.create( # POST /v3/order
@@ -106,10 +108,26 @@ order.dig('last_event', 'status')       # the latest event in the order's lifecy
 order['events'].map { |e| e['status'] } # full status history, oldest → newest
 ```
 
-### Lab results (JSON)
+### Patient Service Centers
+
+Find where a patient can get tested — by area, by lab, or for an existing order.
+Each call takes an optional `radius` in miles (defaults to `25`).
 
 ```ruby
-results = Junction::Orders.results(order_id) # GET /v3/order/{order_id}/result
+# Lab/area coverage for a ZIP — keyed by lab slug, each value carrying a lab_id.
+Junction::PatientServiceCenters.coverage('85004') # GET /v3/order/area/info
+
+# Patient service centers near a ZIP for a specific lab (widen the search to 100 miles).
+Junction::PatientServiceCenters.near('85004', lab_id: 4, radius: 100) # GET /v3/order/psc/info
+
+# Patient service centers available for an existing order.
+Junction::PatientServiceCenters.for_order(order_id) # GET /v3/order/{order_id}/psc/info
+```
+
+### Lab Results
+
+```ruby
+results = Junction::LabResults.find(order_id) # GET /v3/order/{order_id}/result
 
 results.dig('metadata', 'status')         # "final" once the lab has reported
 results.dig('metadata', 'interpretation') # overall read, e.g. "abnormal"
@@ -120,22 +138,19 @@ results['results'].each do |marker|
   marker['type']   # "numeric"  — `result` data type
 end
 
-# Pick out the markers the lab flagged as out of range.
+# Pick out the markers the lab flagged as out of range
 abnormal = results['results'].select { |m| m['interpretation'] == 'abnormal' }
+
+# Get lab results PDF and write it to a file                                                                                                                                                                               
+lab_results_pdf = Junction::LabResults.pdf(order_id) # GET /v3/order/{order_id}/result/pdf                                                                                                                              
+File.binwrite("tmp/lab-results-#{order_id}.pdf", lab_results_pdf)
 ```
 
-### PDFs (requisition form and results)
-
-Both PDF methods return the **raw PDF bytes**
-as a `String`. Write them with `File.binwrite` so the binary
-isn't mangled by encoding/newline translation:
+### Lab Requisition PDF
 
 ```ruby
 lab_req_pdf = Junction::Orders.requisition_pdf(order_id) # GET /v3/order/{order_id}/requisition/pdf
-File.binwrite("tmp/requisition-#{order_id}.pdf", lab_req_pdf)
-
-results_pdf = Junction::Orders.results_pdf(order_id)   # GET /v3/order/{order_id}/result/pdf
-File.binwrite("tmp/results-#{order_id}.pdf", results_pdf)
+File.binwrite("tmp/lab-requisition-#{order_id}.pdf", lab_req_pdf)
 ```
 
 ### Error handling
@@ -154,14 +169,17 @@ end
 
 ## Development
 
+Requires Ruby >= 3.0 (see `.ruby-version`).
+
 ```bash
-bundle install
-bundle exec rspec
+bundle install    # install dependencies
+bundle exec rspec # run the full test suite
 ```
 
-To fire up a console:
+To open a console with the gem loaded, copy `.env.example` to `.env`, fill in
+your sandbox credentials, then run `bin/console`:
 
 ```bash
-# Set up your .env first (copy .env.example), and then run:
+cp .env.example .env # then edit .env and set JUNCTION_API_KEY
 bin/console
 ```
