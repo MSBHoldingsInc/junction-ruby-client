@@ -143,6 +143,60 @@ Junction::PatientServiceCenters.near('85004', lab_id: 4, radius: 100) # GET /v3/
 Junction::PatientServiceCenters.for_order(order_id) # GET /v3/order/{order_id}/psc/info
 ```
 
+### Appointment Scheduling
+
+Patients can find a time, book, reschedule, and cancel a lab appointment
+entirely in-app — no hand-off to the lab's scheduler. This is only available
+for PSCs whose coverage capabilities include `appointment_scheduling_via_junction`
+(currently Quest only). Locations that expose only `appointment_scheduling_with_lab`
+(e.g. Sonora Quest in Arizona) can't be booked through Junction — link the
+patient out to the lab's own scheduler instead. The order/requisition is still
+created via Junction and results flow back the same way; only the time selection
+happens on the lab's side. See the
+[capability docs](https://docs.junction.com/lab/overview/locations#appointment-scheduling-capability).
+
+```ruby
+# Find open slots — by ZIP (returns up to 3 nearby PSCs) or by specific site_codes
+# (from Junction::PatientServiceCenters.near). Each location carries its own
+# iana_timezone; slot start/end times are UTC.
+availability = Junction::Appointments.availability( # POST /v3/order/psc/appointment/availability
+  lab: 'quest',
+  zip_code: '85004',
+  start_date: '2026-06-15',
+  radius: 50 # one of 10, 20, 25, 50, 100 (defaults to 25)
+)
+
+slot = availability['slots'].first['slots'].first
+booking_key = slot['booking_key']
+
+# Book the chosen slot for an order
+appointment = Junction::Appointments.book( # POST /v3/order/{order_id}/psc/appointment/book
+  order_id,
+  booking_key: booking_key,
+  appointment_notes: 'wheelchair access' # optional
+)
+appointment['id']          # the appointment's Junction UUID
+appointment['external_id'] # the lab's own reference (e.g. Quest's 6-letter code), shown to the patient
+appointment['status']      # "confirmed"
+
+# Retrieve the appointment for an order
+Junction::Appointments.find(order_id) # GET /v3/order/{order_id}/psc/appointment
+
+# Reschedule to a new slot (booking_key from another availability lookup)
+Junction::Appointments.reschedule(order_id, booking_key: 'another-booking-key') # PATCH .../reschedule
+
+# Cancel — pick a reason id from the cancellation reasons list
+reasons = Junction::Appointments.cancellation_reasons # GET /v3/order/psc/appointment/cancellation-reasons
+reasons.first['id']            # pass this as cancellation_reason_id
+reasons.first['is_refundable'] # whether cancelling for this reason is refundable
+
+Junction::Appointments.cancel( # PATCH /v3/order/{order_id}/psc/appointment/cancel
+  order_id,
+  cancellation_reason_id: reasons.first['id'],
+  note: 'patient moved out of state' # optional
+)
+```
+
 ### Lab Results
 
 ```ruby

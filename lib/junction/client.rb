@@ -19,8 +19,10 @@ module Junction
         handle_response(super(url(endpoint), query: query, headers: default_headers.merge(custom_headers)))
       end
 
-      def post(endpoint, body = {}, custom_headers = {})
-        handle_response(super(url(endpoint), body: body.to_json, headers: default_headers.merge(custom_headers)))
+      def post(endpoint, body = {}, custom_headers = {}, query = {})
+        handle_response(
+          super(url(endpoint), body: body.to_json, query: query, headers: default_headers.merge(custom_headers))
+        )
       end
 
       def patch(endpoint, body = {}, custom_headers = {})
