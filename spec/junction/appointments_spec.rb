@@ -52,6 +52,31 @@ RSpec.describe Junction::Appointments do
       expect(described_class.availability(lab: 'quest', zip_code: '85004', radius: 50, start_date: '2026-06-15'))
         .to eq({})
     end
+
+    it 'serializes site_codes as a plain query key, not the bracketed array form' do
+      endpoint = %r{/v3/order/psc/appointment/availability}
+      stub_request(:post, endpoint).to_return(status: 200, body: '{}', headers: json)
+
+      described_class.availability(lab: 'quest', site_codes: ['AEME'])
+
+      expect(
+        a_request(:post, endpoint).with do |req|
+          q = req.uri.query
+          q.include?('site_codes=AEME') && !q.include?('site_codes%5B%5D')
+        end
+      ).to have_been_made
+    end
+
+    it 'omits zip_code from the query when it is not provided' do
+      endpoint = %r{/v3/order/psc/appointment/availability}
+      stub_request(:post, endpoint).to_return(status: 200, body: '{}', headers: json)
+
+      described_class.availability(lab: 'quest', site_codes: ['AEME'])
+
+      expect(
+        a_request(:post, endpoint).with { |req| !req.uri.query.include?('zip_code') }
+      ).to have_been_made
+    end
   end
 
   describe '.book' do

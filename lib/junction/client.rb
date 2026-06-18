@@ -5,6 +5,11 @@ module Junction
   class Client
     include HTTParty
 
+    # Serialize array query params as repeated keys (`site_codes=a&site_codes=b`)
+    # rather than HTTParty's default `site_codes[]=a`, which the Junction API
+    # does not recognize (the bracketed form is silently dropped).
+    query_string_normalizer HTTParty::Request::NON_RAILS_QUERY_STRING_NORMALIZER
+
     class RequestError < StandardError
       attr_reader :response
 

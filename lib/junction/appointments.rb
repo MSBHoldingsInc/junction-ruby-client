@@ -13,13 +13,17 @@ module Junction
     # Find available appointment slots
     # POST /v3/order/psc/appointment/availability
     # https://docs.junction.com/api-reference/lab-testing/psc-scheduling/appointment-psc-availability
+    # The API requires at least one of +zip_code+ or +site_codes+. A +zip_code+
+    # (with +radius+) runs a geo search returning up to three nearby PSCs and
+    # overrides +site_codes+; pass +site_codes+ alone (omit +zip_code+) to scope
+    # to exactly those PSCs.
     # @param lab [String] required, "quest" or "sonora_quest"
-    # @param zip_code [String] required, 5-digit ZIP (returns up to three PSCs)
-    # @param radius [Integer, String] 10/20/25/50/100 (defaults to {DEFAULT_RADIUS_MILES})
-    # @param options [Hash] optional filters: +site_codes+, +start_date+ (YYYY-MM-DD), +allow_stale+
+    # @param zip_code [String, nil] 5-digit ZIP for a geo search; omit when scoping by +site_codes+
+    # @param radius [Integer, String, nil] 10/20/25/50/100 (defaults to {DEFAULT_RADIUS_MILES})
+    # @param options [Hash] optional filters: +site_codes+ (Array<String>), +start_date+ (YYYY-MM-DD), +allow_stale+
     # @return [Hash]
-    def self.availability(lab:, zip_code:, radius: DEFAULT_RADIUS_MILES, **options)
-      query = { lab: lab, zip_code: zip_code, radius: radius.to_s, **options }.compact
+    def self.availability(lab:, zip_code: nil, radius: DEFAULT_RADIUS_MILES, **options)
+      query = { lab: lab, zip_code: zip_code, radius: radius&.to_s, **options }.compact
 
       Client.post("#{ENDPOINT}/psc/appointment/availability", {}, {}, query)
     end
