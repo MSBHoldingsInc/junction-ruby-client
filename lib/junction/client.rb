@@ -10,12 +10,50 @@ module Junction
     # does not recognize (the bracketed form is silently dropped).
     query_string_normalizer HTTParty::Request::NON_RAILS_QUERY_STRING_NORMALIZER
 
+    # Raised on any non-2xx Junction response. Carries the raw HTTParty response so
+    # callers can branch on the status code and the parsed +detail+ Junction returns.
     class RequestError < StandardError
+      # @return [HTTParty::Response, nil] the raw response, when available
       attr_reader :response
 
+      # @param message [String] the error message (includes status and raw body)
+      # @param response [HTTParty::Response, nil] the failing response
       def initialize(message, response: nil)
         super(message)
         @response = response
+      end
+
+      # @return [Integer, nil] the HTTP status code Junction returned
+      def status
+        response&.code
+      end
+
+      # Extracts Junction's human-readable +detail+. Business-logic errors return a
+      # string ({"detail": "..."}); validation errors return a list of FastAPI entries
+      # ({"detail": [{"loc":..., "msg":...}]}), whose +msg+ values are joined.
+      # @return [String, nil]
+      def detail
+        body = response&.parsed_response
+        return nil unless body.is_a?(Hash)
+
+        value = body['detail']
+        presence(value.is_a?(Array) ? join_messages(value) : value)
+      end
+
+      private
+
+      # @param entries [Array] FastAPI validation entries (or bare strings)
+      # @return [String] the entries' +msg+ values joined with "; "
+      def join_messages(entries)
+        entries.filter_map { |e| e.is_a?(Hash) ? e['msg'] : e }.join('; ')
+      end
+
+      # @param value [Object] a candidate detail value
+      # @return [String, nil] the value when it is a non-blank string, else nil
+      def presence(value)
+        return nil unless value.is_a?(String)
+
+        value.strip.empty? ? nil : value
       end
     end
 
