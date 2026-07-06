@@ -61,5 +61,37 @@ RSpec.describe Junction::Client do
           expect(e.message).to include('404')
         }
     end
+
+    it 'exposes the status code and a string detail for business-logic errors' do
+      stub_request(:patch, "#{base}/v3/order/o1/psc/appointment/reschedule")
+        .to_return(status: 400,
+                   body: { detail: 'This appointment has been cancelled or completed.' }.to_json,
+                   headers: json)
+
+      expect { described_class.patch('/v3/order/o1/psc/appointment/reschedule') }
+        .to raise_error(Junction::Client::RequestError) { |e|
+          expect(e.status).to eq(400)
+          expect(e.detail).to eq('This appointment has been cancelled or completed.')
+        }
+    end
+
+    it 'joins validation-error messages into a single detail string' do
+      validation = { detail: [{ loc: %w[body booking_key], msg: 'field required', type: 'value_error.missing' }] }
+      stub_request(:post, "#{base}/v3/order/o1/psc/appointment/book")
+        .to_return(status: 422, body: validation.to_json, headers: json)
+
+      expect { described_class.post('/v3/order/o1/psc/appointment/book') }
+        .to raise_error(Junction::Client::RequestError) { |e|
+          expect(e.status).to eq(422)
+          expect(e.detail).to eq('field required')
+        }
+    end
+
+    it 'returns nil detail when the body is not a JSON object' do
+      stub_request(:get, "#{base}/v2/user/missing").to_return(status: 404, body: 'not found')
+
+      expect { described_class.get('/v2/user/missing') }
+        .to raise_error(Junction::Client::RequestError) { |e| expect(e.detail).to be_nil }
+    end
   end
 end
