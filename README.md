@@ -226,6 +226,78 @@ lab_req_pdf = Junction::Orders.requisition_pdf(order_id) # GET /v3/order/{order_
 File.binwrite("tmp/lab-requisition-#{order_id}.pdf", lab_req_pdf)
 ```
 
+### Lab Test Markers
+
+List the markers (biomarkers) a lab test measures.
+
+```ruby
+markers = Junction::LabTests.markers('lab_test_id') # GET /v3/lab_tests/{lab_test_id}/markers
+markers.first =>
+{
+  "id" => 3188,
+  "name" => "IGF-1, LC/MS",
+  "slug" => "igf-1-lc-ms",
+  "description" => "IGF-1, LC/MS",
+  "lab_id" => 7,
+  "provider_id" => "16293",
+  "type" => "panel",
+  "unit" => nil,
+  "price" => "18.00",
+  "aoe" => nil,
+  "a_la_carte_enabled" => true,
+  "common_tat_days" => 9,
+  "worst_case_tat_days" => 13,
+  "is_orderable" => true,
+  "expected_results" => [
+    {
+      "id" => 109648,
+      "name" => "Igf 1, Lc/Ms",
+      "slug" => "igf-1-lc-ms",
+      "lab_id" => 7,
+      "provider_id" => "86006200",
+      "required" => true,
+      "loinc" => {
+        "id" => 15678,
+        "name" => "Insulin-like growth factor-I [Mass/Vol]",
+        "slug" => "insulin-like-growth-factor-i-mass-vol",
+        "code" => "2484-4",
+        "unit" => "ng/mL"
+      }
+    },
+    {
+      "id" => 109649,
+      "name" => "Z Score (Male)",
+      "slug" => "z-score-male",
+      "lab_id" => 7,
+      "provider_id" => "86006684",
+      "required" => false,
+      "loinc" => {
+        "id" => 48476,
+        "name" => "Insulin-like growth factor-I [Z-score]",
+        "slug" => "insulin-like-growth-factor-i-z-score",
+        "code" => "73561-3",
+        "unit" => "{Z-score}"
+      }
+    },
+    {
+      "id" => 109650,
+      "name" => "Z Score (Female)",
+      "slug" => "z-score-female",
+      "lab_id" => 7,
+      "provider_id" => "86006201",
+      "required" => false,
+      "loinc" => {
+        "id" => 48476,
+        "name" => "Insulin-like growth factor-I [Z-score]",
+        "slug" => "insulin-like-growth-factor-i-z-score",
+        "code" => "73561-3",
+        "unit" => "{Z-score}"
+      }
+    }
+  ]
+}
+```
+
 ### Error handling
 
 Non-2xx responses raise `Junction::Client::RequestError`, which carries the
