@@ -41,9 +41,14 @@ module Junction
     # GET /v2/user/resolve/{client_user_id}
     # https://docs.junction.com/api-reference/user/resolve-user
     # @param client_user_id [String]
-    # @return [Hash]
+    # @return [Hash] empty hash when Junction responds with "User not found";
+    #   other {Client::RequestError}s are re-raised.
     def self.find_by_client_user_id(client_user_id)
       Client.get("#{ENDPOINT}/resolve/#{client_user_id}")
+    rescue Client::RequestError => e
+      return {} if e.message.match?(/User not found/i)
+
+      raise e
     end
   end
 end
