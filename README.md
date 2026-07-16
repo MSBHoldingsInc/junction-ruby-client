@@ -340,3 +340,19 @@ your sandbox credentials, then run `bin/console`:
 cp .env.example .env # then edit .env and set JUNCTION_API_KEY
 bin/console
 ```
+
+## Releasing
+
+Consumers pin to a `vX.Y.Z` git tag, so tagging
+is the release — there's no `gem push` (`allowed_push_host` is `none`).
+
+1. Bump `Junction::VERSION` in `lib/junction/version.rb` on your PR branch.
+2. Merge to `main`, then tag the merge commit and push:
+
+    ```bash
+    git checkout main && git pull --ff-only
+    git tag -a v0.4.4 -m "v0.4.4"
+    git push origin v0.4.4
+    ```
+
+3. Bump `tag:` in the consuming app's Gemfile and `bundle update junction-ruby-client`.
