@@ -4,6 +4,7 @@ module Junction
   # Wraps the Junction (Vital) `/v2/user` endpoints.
   class Users
     ENDPOINT = '/v2/user'
+    LIMIT = 500
 
     # Creates a Junction user.
     # POST /v2/user
@@ -49,6 +50,27 @@ module Junction
       return {} if e.message.match?(/User not found/i)
 
       raise e
+    end
+
+    # Lists every user across all pages.
+    # GET /v2/user
+    # https://docs.junction.com/api-reference/user/get-users
+    # @return [Array<Hash>]
+    def self.all
+      users = []
+      offset = 0
+
+      loop do
+        response = Client.get(ENDPOINT, { offset: offset, limit: LIMIT })
+        batch = response.fetch('users', [])
+        users.concat(batch)
+
+        break if batch.empty? || users.size >= response.fetch('total', users.size)
+
+        offset += LIMIT
+      end
+
+      users
     end
   end
 end
