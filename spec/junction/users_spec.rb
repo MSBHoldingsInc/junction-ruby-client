@@ -34,6 +34,30 @@ RSpec.describe Junction::Users do
     end
   end
 
+  describe '.all' do
+    it 'pages through offset/limit and returns every user' do
+      stub_request(:get, "#{base}/v2/user").with(query: { offset: '0', limit: '500' })
+                                           .to_return(status: 200, body: { users: [{ user_id: 'u1' }],
+                                                                           total: 2 }.to_json, headers: json)
+      stub_request(:get, "#{base}/v2/user").with(query: { offset: '500', limit: '500' })
+                                           .to_return(status: 200, body: { users: [{ user_id: 'u2' }],
+                                                                           total: 2 }.to_json, headers: json)
+
+      expect(described_class.all).to eq([{ 'user_id' => 'u1' }, { 'user_id' => 'u2' }])
+    end
+
+    it 'stops on an empty batch even if total is overstated' do
+      stub_request(:get, "#{base}/v2/user").with(query: { offset: '0', limit: '500' })
+                                           .to_return(status: 200, body: { users: [{ user_id: 'u1' }],
+                                                                           total: 99 }.to_json, headers: json)
+      stub_request(:get, "#{base}/v2/user").with(query: { offset: '500', limit: '500' })
+                                           .to_return(status: 200, body: { users: [],
+                                                                           total: 99 }.to_json, headers: json)
+
+      expect(described_class.all).to eq([{ 'user_id' => 'u1' }])
+    end
+  end
+
   describe '.update_user_demographics' do
     it 'PATCHes the info endpoint with the given body' do
       stub_request(:patch, "#{base}/v2/user/uuid-1/info")
