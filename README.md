@@ -93,8 +93,12 @@ user['dob']              # "1999-01-01"
 > and `patient_address` sent with each order creation will update that user on Junction's side,
 > so there's no need for a separate "update user" call.
 
+`create` takes two required keywords: `body:` (the order payload) and `idempotency_key:`,
+which is sent as the `X-Idempotency-Key` header. Junction dedupes on that key — a repeated
+request with the same key replays the original response instead of creating a second order.
+
 ```ruby
-order = Junction::Orders.create( # POST /v3/order
+payload = {
   user_id: user['user_id'],
   patient_details: {
     first_name: 'John',
@@ -117,6 +121,11 @@ order = Junction::Orders.create( # POST /v3/order
   order_set: {
     lab_test_ids: ['5cdc1f4a-5b1a-4c2b-9c1f-3a4b5c6d7e8f']
   }
+}
+
+order = Junction::Orders.create( # POST /v3/order
+  body: payload,
+  idempotency_key: 'order-123456789'
 )
 
 order_id = order.dig('order', 'id')

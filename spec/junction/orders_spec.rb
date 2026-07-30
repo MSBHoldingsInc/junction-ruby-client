@@ -13,7 +13,24 @@ RSpec.describe Junction::Orders do
         .with(body: { user_id: 'uuid-1' }.to_json)
         .to_return(status: 200, body: { id: 'order-1' }.to_json, headers: json)
 
-      expect(described_class.create(user_id: 'uuid-1')).to eq('id' => 'order-1')
+      order = described_class.create(body: { user_id: 'uuid-1' }, idempotency_key: 'order-1')
+
+      expect(order).to eq('id' => 'order-1')
+    end
+
+    it 'sends the idempotency key as the X-Idempotency-Key header' do
+      stub_request(:post, "#{base}/v3/order")
+        .with(headers: { 'X-Idempotency-Key' => 'order-123456789' })
+        .to_return(status: 200, body: { id: 'order-1' }.to_json, headers: json)
+
+      order = described_class.create(body: { user_id: 'uuid-1' }, idempotency_key: 'order-123456789')
+
+      expect(order).to eq('id' => 'order-1')
+    end
+
+    it 'requires both a body and an idempotency key' do
+      expect { described_class.create(body: { user_id: 'uuid-1' }) }.to raise_error(ArgumentError)
+      expect { described_class.create(idempotency_key: 'order-1') }.to raise_error(ArgumentError)
     end
   end
 
