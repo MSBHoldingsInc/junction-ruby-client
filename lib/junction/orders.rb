@@ -7,10 +7,12 @@ module Junction
     # Create or submit order
     # POST /v3/order
     # https://docs.junction.com/api-reference/lab-testing/create-order
+    # https://docs.junction.com/lab/overview/idempotency
     # @param body [Hash]
+    # @param idempotency_key [String]
     # @return [Hash]
-    def self.create(body = {})
-      Client.post(ENDPOINT, body)
+    def self.create(body:, idempotency_key:)
+      Client.post(ENDPOINT, body, { 'X-Idempotency-Key' => idempotency_key })
     end
 
     # Retrieve order
