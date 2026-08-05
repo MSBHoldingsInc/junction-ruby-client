@@ -228,6 +228,34 @@ lab_results_pdf = Junction::LabResults.pdf(order_id) # GET /v3/order/{order_id}/
 File.binwrite("tmp/lab-results-#{order_id}.pdf", lab_results_pdf)
 ```
 
+### Order Transactions
+
+Junction uses the concept of **order transactions** to group related orders together and provide unified results. An order transaction represents a single testing journey, which will include, at a minimum, one `initial` order.
+
+The transaction id comes back on the order results payload:
+
+```ruby
+results = Junction::LabResults.find(order_id)
+transaction_id = results.dig('order_transaction', 'id')
+```
+
+```ruby
+# Retrieve a single order transaction
+txn = Junction::OrderTransactions.find(transaction_id) # GET /v3/order_transaction/{transaction_id}
+
+# Results for that transaction, same shape as Junction::LabResults.find
+txn_results = Junction::OrderTransactions.results(transaction_id)
+# GET /v3/order_transaction/{transaction_id}/result
+
+# Results PDF for that transaction — raw bytes, same as Junction::LabResults.pdf
+txn_pdf = Junction::OrderTransactions.results_pdf(transaction_id)
+# GET /v3/order_transaction/{transaction_id}/result/pdf
+File.binwrite("tmp/lab-results-#{transaction_id}.pdf", txn_pdf)
+```
+
+Use `Junction::LabResults` when you want results for a specific order. Use `Junction::OrderTransactions`
+when you want combined results for all orders within a transaction (e.g., a full testing journey).
+
 ### Lab Requisition PDF
 
 ```ruby
