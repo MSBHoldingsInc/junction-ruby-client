@@ -134,7 +134,13 @@ order.dig('order', 'last_event', 'status') # the latest event in the order's lif
 order = Junction::Orders.find(order_id) # GET /v3/order/{order_id}
 order.dig('last_event', 'status')       # the latest event in the order's lifecycle, e.g. "received.at_home_phlebotomy.ordered"
 order['events'].map { |e| e['status'] } # full status history, oldest → newest
+
+cancelled = Junction::Orders.cancel(order_id) # POST /v3/order/{order_id}/cancel
+cancelled.dig('order', 'status')              # "cancelled"
 ```
+
+Junction answers 4xx with a `detail` when the order is past the point of cancellation. A walk-in
+order's PSC appointment is cancelled along with it.
 
 ### Patient Service Centers
 

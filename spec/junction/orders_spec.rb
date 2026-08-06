@@ -63,6 +63,28 @@ RSpec.describe Junction::Orders do
     end
   end
 
+  describe '.cancel' do
+    it 'POSTs to the cancel path and returns the parsed response' do
+      stub_request(:post, "#{base}/v3/order/order-1/cancel")
+        .to_return(status: 200,
+                   body: { order: { id: 'order-1', status: 'cancelled' }, status: 'ok' }.to_json,
+                   headers: json)
+
+      result = described_class.cancel('order-1')
+
+      expect(result.dig('order', 'status')).to eq('cancelled')
+    end
+
+    it 'raises on a non-2xx response' do
+      stub_request(:post, "#{base}/v3/order/order-1/cancel")
+        .to_return(status: 400, body: { detail: 'Order cannot be cancelled' }.to_json, headers: json)
+
+      expect { described_class.cancel('order-1') }.to raise_error(Junction::Client::RequestError) { |error|
+        expect(error.detail).to eq('Order cannot be cancelled')
+      }
+    end
+  end
+
   describe '.requisition_pdf' do
     it 'requests the requisition PDF with an application/pdf Accept header and returns the raw bytes' do
       stub_request(:get, "#{base}/v3/order/order-1/requisition/pdf")

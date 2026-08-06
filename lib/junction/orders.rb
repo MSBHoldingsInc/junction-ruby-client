@@ -24,6 +24,15 @@ module Junction
       Client.get("#{ENDPOINT}/#{order_id}")
     end
 
+    # Cancel order
+    # POST /v3/order/{order_id}/cancel
+    # https://docs.junction.com/api-reference/lab-testing/cancel-order
+    # @param order_id [String]
+    # @return [Hash]
+    def self.cancel(order_id)
+      Client.post("#{ENDPOINT}/#{order_id}/cancel")
+    end
+
     # Retrieve requisition PDF
     # GET /v3/order/{order_id}/requisition/pdf
     # https://docs.junction.com/api-reference/lab-testing/requisition-pdf
