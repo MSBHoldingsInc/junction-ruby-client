@@ -10,6 +10,10 @@ module Junction
     # does not recognize (the bracketed form is silently dropped).
     query_string_normalizer HTTParty::Request::NON_RAILS_QUERY_STRING_NORMALIZER
 
+    open_timeout 3
+    read_timeout 10
+    write_timeout 10
+
     # Raised on any non-2xx Junction response. Carries the raw HTTParty response so
     # callers can branch on the status code and the parsed +detail+ Junction returns.
     class RequestError < StandardError
