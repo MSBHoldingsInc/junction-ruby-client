@@ -38,10 +38,33 @@ end
 
 ### Options
 
-| Option     | Default                                  | Notes                                            |
-|------------|------------------------------------------|--------------------------------------------------|
-| `api_key`  | `nil`                                    | Sent as the `x-vital-api-key` header.            |
-| `base_uri` | `https://api.sandbox.us.junction.com`    | Region/env host (`api.us` / `api.eu`, sandbox or prod). |
+| Option          | Default                                  | Notes                                            |
+|-----------------|------------------------------------------|--------------------------------------------------|
+| `api_key`       | `nil`                                    | Sent as the `x-vital-api-key` header.            |
+| `base_uri`      | `https://api.sandbox.us.junction.com`    | Region/env host (`api.us` / `api.eu`, sandbox or prod). |
+| `open_timeout`  | `3`                                      | Seconds to wait for the TCP/TLS connection.      |
+| `read_timeout`  | `10`                                     | Seconds to wait for a response once the request is sent. |
+| `write_timeout` | `10`                                     | Seconds to wait while writing the request body.  |
+
+### Timeouts
+
+The timeout defaults are deliberately tighter than Net::HTTP's 60s, so a slow or
+unresponsive Junction API fails fast instead of tying up a Rails request or a
+Sidekiq worker for a full minute. Raise them for known-slow calls, or set one to
+`nil` to fall back to the Net::HTTP default:
+
+```ruby
+Junction.configure do |c|
+  c.open_timeout  = 5
+  c.read_timeout  = 30
+  c.write_timeout = nil # no explicit write timeout
+end
+```
+
+A request that exceeds a timeout raises `Net::OpenTimeout` or `Net::ReadTimeout`,
+not `Junction::Client::RequestError`, since no HTTP response was received.
+Timeouts are read from configuration on each request, so changing them at runtime
+takes effect immediately.
 
 ## Usage
 
