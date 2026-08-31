@@ -94,4 +94,58 @@ RSpec.describe Junction::Client do
         .to raise_error(Junction::Client::RequestError) { |e| expect(e.detail).to be_nil }
     end
   end
+
+  describe 'timeouts' do
+    before do
+      stub_request(:get, "#{base}/v2/ping").to_return(status: 200, body: '{}', headers: json)
+      allow(HTTParty::Request).to receive(:new).and_call_original
+    end
+
+    it 'passes the configured defaults on every request' do
+      described_class.get('/v2/ping')
+
+      expect(HTTParty::Request).to have_received(:new)
+        .with(anything, anything, hash_including(open_timeout: 5, read_timeout: 15, write_timeout: 10))
+    end
+
+    it 'reads timeouts from configuration at request time, not at load time' do
+      Junction.configure do |c|
+        c.open_timeout  = 1
+        c.read_timeout  = 30
+        c.write_timeout = 20
+      end
+
+      described_class.get('/v2/ping')
+
+      expect(HTTParty::Request).to have_received(:new)
+        .with(anything, anything, hash_including(open_timeout: 1, read_timeout: 30, write_timeout: 20))
+    end
+
+    it 'omits a timeout that is configured as nil' do
+      Junction.configure { |c| c.read_timeout = nil }
+
+      described_class.get('/v2/ping')
+
+      expect(HTTParty::Request).to have_received(:new)
+        .with(anything, anything, hash_excluding(:read_timeout))
+    end
+
+    it 'applies timeouts to post as well' do
+      stub_request(:post, "#{base}/v2/user").to_return(status: 200, body: '{}', headers: json)
+
+      described_class.post('/v2/user', client_user_id: 'abc')
+
+      expect(HTTParty::Request).to have_received(:new)
+        .with(anything, anything, hash_including(open_timeout: 5, read_timeout: 15, write_timeout: 10))
+    end
+
+    it 'applies timeouts to patch as well' do
+      stub_request(:patch, "#{base}/v2/user/uuid/info").to_return(status: 200, body: '{}', headers: json)
+
+      described_class.patch('/v2/user/uuid/info', first_name: 'Jo')
+
+      expect(HTTParty::Request).to have_received(:new)
+        .with(anything, anything, hash_including(open_timeout: 5, read_timeout: 15, write_timeout: 10))
+    end
+  end
 end

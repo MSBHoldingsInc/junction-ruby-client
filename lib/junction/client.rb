@@ -59,17 +59,22 @@ module Junction
 
     class << self
       def get(endpoint, query = {}, custom_headers = {})
-        handle_response(super(url(endpoint), query: query, headers: default_headers.merge(custom_headers)))
+        handle_response(
+          super(url(endpoint), **timeouts, query: query, headers: default_headers.merge(custom_headers))
+        )
       end
 
       def post(endpoint, body = {}, custom_headers = {}, query = {})
         handle_response(
-          super(url(endpoint), body: body.to_json, query: query, headers: default_headers.merge(custom_headers))
+          super(url(endpoint), **timeouts, body: body.to_json, query: query,
+                                           headers: default_headers.merge(custom_headers))
         )
       end
 
       def patch(endpoint, body = {}, custom_headers = {})
-        handle_response(super(url(endpoint), body: body.to_json, headers: default_headers.merge(custom_headers)))
+        handle_response(
+          super(url(endpoint), **timeouts, body: body.to_json, headers: default_headers.merge(custom_headers))
+        )
       end
 
       private
@@ -79,6 +84,19 @@ module Junction
       # base URL configurable at runtime instead of frozen at load time.
       def url(endpoint)
         "#{Junction.configuration.base_uri}#{endpoint}"
+      end
+
+      # Read timeouts from config at request time, for the same reason as +url+:
+      # HTTParty's class-level timeout macros are evaluated when this file is
+      # loaded, so they would ignore any Junction.configure block that runs
+      # afterwards (a Rails initializer, for instance). A timeout configured as
+      # nil is omitted entirely so Net::HTTP applies its own default.
+      def timeouts
+        {
+          open_timeout: Junction.configuration.open_timeout,
+          read_timeout: Junction.configuration.read_timeout,
+          write_timeout: Junction.configuration.write_timeout
+        }.compact
       end
 
       def default_headers
