@@ -105,7 +105,7 @@ RSpec.describe Junction::Client do
       described_class.get('/v2/ping')
 
       expect(HTTParty::Request).to have_received(:new)
-        .with(anything, anything, hash_including(open_timeout: 3, read_timeout: 10, write_timeout: 10))
+        .with(anything, anything, hash_including(open_timeout: 5, read_timeout: 15, write_timeout: 10))
     end
 
     it 'reads timeouts from configuration at request time, not at load time' do
@@ -136,7 +136,7 @@ RSpec.describe Junction::Client do
       described_class.post('/v2/user', client_user_id: 'abc')
 
       expect(HTTParty::Request).to have_received(:new)
-        .with(anything, anything, hash_including(open_timeout: 3, read_timeout: 10, write_timeout: 10))
+        .with(anything, anything, hash_including(open_timeout: 5, read_timeout: 15, write_timeout: 10))
     end
 
     it 'applies timeouts to patch as well' do
@@ -145,7 +145,7 @@ RSpec.describe Junction::Client do
       described_class.patch('/v2/user/uuid/info', first_name: 'Jo')
 
       expect(HTTParty::Request).to have_received(:new)
-        .with(anything, anything, hash_including(open_timeout: 3, read_timeout: 10, write_timeout: 10))
+        .with(anything, anything, hash_including(open_timeout: 5, read_timeout: 15, write_timeout: 10))
     end
   end
 end

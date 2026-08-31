@@ -42,8 +42,8 @@ end
 |-----------------|------------------------------------------|--------------------------------------------------|
 | `api_key`       | `nil`                                    | Sent as the `x-vital-api-key` header.            |
 | `base_uri`      | `https://api.sandbox.us.junction.com`    | Region/env host (`api.us` / `api.eu`, sandbox or prod). |
-| `open_timeout`  | `3`                                      | Seconds to wait for the TCP/TLS connection.      |
-| `read_timeout`  | `10`                                     | Seconds to wait for a response once the request is sent. |
+| `open_timeout`  | `5`                                      | Seconds to wait for the TCP/TLS connection.      |
+| `read_timeout`  | `15`                                     | Seconds to wait for a response once the request is sent. |
 | `write_timeout` | `10`                                     | Seconds to wait while writing the request body.  |
 
 ### Timeouts
@@ -55,8 +55,8 @@ Sidekiq worker for a full minute. Raise them for known-slow calls, or set one to
 
 ```ruby
 Junction.configure do |c|
-  c.open_timeout  = 5
-  c.read_timeout  = 30
+  c.open_timeout  = 10
+  c.read_timeout  = 60
   c.write_timeout = nil # no explicit write timeout
 end
 ```

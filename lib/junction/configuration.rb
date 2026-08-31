@@ -12,8 +12,8 @@ module Junction
     # Timeout defaults, in seconds. Deliberately much tighter than Net::HTTP's
     # 60s so a slow or unresponsive Junction API fails fast rather than tying up
     # the calling process (a Rails request, a Sidekiq worker) for a full minute.
-    DEFAULT_OPEN_TIMEOUT = 3
-    DEFAULT_READ_TIMEOUT = 10
+    DEFAULT_OPEN_TIMEOUT = 5
+    DEFAULT_READ_TIMEOUT = 15
     DEFAULT_WRITE_TIMEOUT = 10
 
     attr_accessor :api_key, :base_uri

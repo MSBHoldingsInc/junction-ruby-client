@@ -6,12 +6,12 @@ RSpec.describe Junction::Configuration do
   describe 'timeout defaults' do
     subject(:config) { described_class.new }
 
-    it 'defaults open_timeout to 3 seconds' do
-      expect(config.open_timeout).to eq(3)
+    it 'defaults open_timeout to 5 seconds' do
+      expect(config.open_timeout).to eq(5)
     end
 
-    it 'defaults read_timeout to 10 seconds' do
-      expect(config.read_timeout).to eq(10)
+    it 'defaults read_timeout to 15 seconds' do
+      expect(config.read_timeout).to eq(15)
     end
 
     it 'defaults write_timeout to 10 seconds' do
@@ -42,7 +42,7 @@ RSpec.describe Junction::Configuration do
       Junction.configure { |c| c.open_timeout = 99 }
       Junction.reset_configuration!
 
-      expect(Junction.configuration.open_timeout).to eq(3)
+      expect(Junction.configuration.open_timeout).to eq(5)
     end
   end
 end
